@@ -1,0 +1,22 @@
+title: Bits, Bytes & Beyond
+description: "Notes on code, security, and life"
+baseurl: "/blogs"
+url: "https://bpradipt.github.io"
+
+author:
+  name: Pradipta Banerjee
+  url: https://github.com/bpradipt
+
+permalink: /:year-:month-:day/:title
+
+defaults:
+  - scope:
+      path: ""
+      type: "posts"
+    values:
+      layout: post
+
+exclude:
+  - README.md
+  - LICENSE
+  - NOTICE
