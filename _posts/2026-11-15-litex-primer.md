@@ -14,13 +14,7 @@ LiteX is a Python framework for designing system-on-chips (SoCs). You describe t
 LiteX consists of the following main layers:
 
 
-| Layer | What it gives you | Used in the series as |
-|---|---|---|
-| **Migen** | a hardware description language embedded in Python: signals, logic, registers, memories | the Root of Trust block |
-| **LiteX cores** | ready-made hardware: CPU wrappers (VexRiscv and others), Wishbone and CSR buses, UART, timer, RAM and ROM | the CPU, buses, memories, UART |
-| **SoC builder** | `SoCCore` assembles cores into an SoC with a memory map; `Builder` generates everything | `make_soc()` in each lab |
-| **Build backends** | Verilator for simulation; Vivado, Yosys/nextpnr and others for FPGAs | Verilator only |
-| **Software** | a BIOS, `libbase` (drivers), picolibc, CPU start-up code, linker scripts, generated headers | the boot ROM and firmware build |
+![LiteX layers]({{ '/assets/diagrams/layers.png' | relative_url }})
 
 Then there are ecosystem projects like: LiteDRAM, LiteEth, LiteSPI, LiteSDCard and more ([Cores-Ecosystem](https://github.com/enjoy-digital/litex/wiki/Cores-Ecosystem)). [litex-boards](https://github.com/litex-hub/litex-boards) adds platform and target files for hundreds of FPGA boards.
 
@@ -28,11 +22,7 @@ Then there are ecosystem projects like: LiteDRAM, LiteEth, LiteSPI, LiteSDCard a
 
 ## Three ways to use LiteX
 
-| Way | Example | Good for |
-|---|---|---|
-| **The CLI tools** | `litex_sim --cpu-type=vexriscv` | trying LiteX: a ready-made SoC with a BIOS prompt, configured by flags |
-| **A litex-boards target** | `python3 -m litex_boards.targets.digilent_arty --build --load` | running a standard SoC on a real FPGA board |
-| **Your own SoC script** | `rot_soc.py`, `cc_soc.py`, `trustee_soc.py`, `tls_soc.py` | custom hardware, custom boot flow |
+![Three ways to use LiteX]({{ '/assets/diagrams/three-ways.png' | relative_url }})
 
 The LiteX documentation primarily focuses on the first two ways. The series uses the third, for the following reasons:
 
@@ -88,11 +78,7 @@ For details, refer to the Migen [manual](https://m-labs.hk/migen/manual/).
 
 A Control and Status Register (CSR) is a hardware register at a fixed address that lets the CPU read or write its value. LiteX provides three types of CSRs:
 
-| Class | Hardware side | CPU side | In the series |
-|---|---|---|---|
-| `CSRStatus(n)` | drives `.status` | reads | `fuse_digest`, `locked`, `uds` |
-| `CSRStorage(n)` | reads `.storage`; `.re` pulses for one cycle on each CPU write | writes, reads back | `lock`, `meas_stage` |
-| `CSR(n)` | sees `.r` and `.re` (write strobe), drives `.w` | writes and reads, no storage | `sim_finish` |
+![CSR types]({{ '/assets/diagrams/csrs.png' | relative_url }})
 
 Here is the Root of Trust block that we'll use, minus its fuses:
 
@@ -214,12 +200,7 @@ build/
 
 Before the boot ROM starts, a lab run prints three kinds of output lines. Each set comes from a different program and corresponds to a different stage in the process. Knowing this will help you understand what is happening as you play with the lab.
 
-| Stage | Printed by | Example | What happens |
-|---|---|---|---|
-| 1. Assembly | Python (`SoCCore`, `Builder`) | `INFO:SoC:CPU vexriscv setting reset address to 0x00000000.` | LiteX assembles the SoC and writes `sim.v`, the `.init` files and the headers |
-| 2. Compile | `make`, Verilator, C compiler | `verilator -Wno-fatal -O3 --cc …` (or `[build] RTL unchanged…`) | `sim.v` becomes `obj_dir/Vsim`; each simulation module becomes a `.so` |
-| 3. Starting of the simulator | `Vsim` and its modules | `[gmii_ethernet] loaded`, `[clocker] sys_clk: freq_hz=1000000` | modules load, `sim_config.js` picks the ones to attach |
-| 4. Power on  | simulated SoC | `[rom] reset vector reached` | memories fill from `.init` files, reset releases, the CPU fetches from `0x0` |
+![What to expect from a run]({{ '/assets/diagrams/run-stages.png' | relative_url }})
 
 ### `INFO:SoC`: Building the SoC using Python
 
@@ -360,12 +341,7 @@ LiteX's C library is small so you'll have to write some custom helpers as per yo
 
 The following are the different mechanisms:
 
-| Way | How | Used by |
-|---|---|---|
-| ROM contents | `integrated_rom_init=` at build time | the labs' boot ROMs |
-| RAM contents | `integrated_main_ram_init=` at build time (simulation) | the labs' firmware: "a loader already put it in RAM" |
-| BIOS serial boot | `litex_term /dev/ttyUSB0 --kernel=app.bin` uploads to `0x4000_0000` and jumps | the normal way on an FPGA board |
-| BIOS from flash, SD card or Ethernet | BIOS boot commands | Linux and other larger systems |
+![Getting firmware into the chip]({{ '/assets/diagrams/firmware.png' | relative_url }})
 
 For a starting point, `litex_bare_metal_demo --build-path=build/<target>` creates a demo application with a Makefile like the one above. The [Load Application Code To CPU](https://github.com/enjoy-digital/litex/wiki/Load-Application-Code-To-CPU) page walks through the BIOS options.
 
@@ -373,17 +349,7 @@ For a starting point, `litex_bare_metal_demo --build-path=build/<target>` create
 
 ## Some gotchas I ran into
 
-| Symptom | Cause | Fix used in the labs |
-|---|---|---|
-| Changes to the hardware don't take effect | `build(run=False)` skips compiling the simulator | call the compile step yourself, then run `obj_dir/Vsim` |
-| Every run recompiles the simulator | LiteX re-runs Verilator on every build, and `sim.v` contains timestamps | hash `sim.v` without comments; skip the compile when the hash matches |
-| Memory or fuse contents need a rebuild | values written as constants in the logic | put them in a `Memory`; LiteX loads `.init` files at start-up |
-| Building without the timer fails | `libbase` uses `timer0` | keep the timer |
-| Pass 1 builds a BIOS you don't want | an empty ROM means "use the BIOS" | `soc.integrated_rom_initialized = True` |
-| A second UART can't reach the simulator | `serial2console` and `serial2tcp` only accept pads named `serial` | one UART, with the host telling log lines from protocol lines |
-| Input sent to the chip gets corrupted | the console bridge buffers 2 KiB of input | the chip asks for each chunk (`TCP MORE`) |
-| The first byte sent at boot disappears | `uart_init()` clears a pending byte | the firmware says `HELLO` before the host sends |
-| FST waveforms won't open | Verilator and GTKWave versions disagree on FST | record VCD instead |
+![Gotchas]({{ '/assets/diagrams/gotchas.png' | relative_url }})
 
 ---
 

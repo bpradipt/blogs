@@ -46,6 +46,17 @@ site stays JavaScript-free).
 
 Requires Node/npx; the first run downloads mermaid-cli and a headless Chromium.
 
+### Tables
+
+Markdown tables can be rendered to PNG for cross-posting (e.g. to Medium,
+which can't render Markdown tables):
+
+1. Save the table as `assets/diagrams/tables/<name>.md`.
+2. Run `python3 scripts/render-table.py assets/diagrams/tables/<name>.md assets/diagrams/<name>.png`.
+3. Reference it in a post the same way as a diagram.
+
+Requires Pillow (`pip3 install pillow`).
+
 ## One-time setup
 
 GitHub repo → **Settings → Pages** → Source = *Deploy from a branch* → `main` / `/ (root)`.
