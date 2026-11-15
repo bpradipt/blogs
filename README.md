@@ -37,11 +37,11 @@ site stays JavaScript-free).
 
 1. Save the mermaid source as `assets/diagrams/<name>.mmd`.
 2. Run `./scripts/render-mermaid.sh assets/diagrams/<name>.mmd` — this writes
-   `<name>.svg`.
+   `<name>.png` (pass a `.svg` path as the second argument if you prefer SVG).
 3. Reference it in a post:
 
    ```markdown
-   ![Caption]({{ '/assets/diagrams/<name>.svg' | relative_url }})
+   ![Caption]({{ '/assets/diagrams/<name>.png' | relative_url }})
    ```
 
 Requires Node/npx; the first run downloads mermaid-cli and a headless Chromium.
