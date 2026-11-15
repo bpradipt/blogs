@@ -30,6 +30,22 @@ A minimal blog on GitHub Pages, styled after the [Tale](https://github.com/chest
 - Look and feel: `assets/main.css`
 - Layouts: `_layouts/`
 
+## Diagrams
+
+Mermaid diagrams are rendered to SVG locally and committed as images (so the
+site stays JavaScript-free).
+
+1. Save the mermaid source as `assets/diagrams/<name>.mmd`.
+2. Run `./scripts/render-mermaid.sh assets/diagrams/<name>.mmd` — this writes
+   `<name>.svg`.
+3. Reference it in a post:
+
+   ```markdown
+   ![Caption]({{ '/assets/diagrams/<name>.svg' | relative_url }})
+   ```
+
+Requires Node/npx; the first run downloads mermaid-cli and a headless Chromium.
+
 ## One-time setup
 
 GitHub repo → **Settings → Pages** → Source = *Deploy from a branch* → `main` / `/ (root)`.

@@ -292,13 +292,7 @@ Each `interface` name pads from the platform's `_io` list. `clocker` drives `sys
 
 The simulator advances time in steps of `timebase`, 500,000 ps here, which is half a period of the 1 MHz clock:
 
-```mermaid
-flowchart LR
-    A["clocker tick<br/>toggle sys_clk"] --> B["eval()<br/>the whole chip<br/>reacts to the clock"]
-    B --> C["other module ticks<br/>serial2console moves<br/>UART bytes"]
-    C --> D["time += 0.5 µs"]
-    D --> A
-```
+![Simulator run loop]({{ '/assets/diagrams/sim-run-loop.svg' | relative_url }})
 
 `eval()` is the Verilated chip. On a rising clock edge, every `self.sync` assignment in every block takes effect, and every `self.comb` assignment settles. The loop stops when the firmware writes `sim_finish`. That write prints the closing `[sim] sys_clk=1.000MHz, simulated=…, elapsed=…` line, which shows how fast the simulation ran compared with real time.
 

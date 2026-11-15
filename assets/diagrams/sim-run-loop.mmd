@@ -1,0 +1,5 @@
+flowchart LR
+    A["clocker tick<br/>toggle sys_clk"] --> B["eval()<br/>the whole chip<br/>reacts to the clock"]
+    B --> C["other module ticks<br/>serial2console moves<br/>UART bytes"]
+    C --> D["time += 0.5 µs"]
+    D --> A
