@@ -1,0 +1,37 @@
+flowchart TD
+    subgraph S1["1 · Pass 1: elaborate the SoC"]
+        HDR["csr.h, mem.h<br/>libc, libbase"]
+    end
+    subgraph S2["2 · Build the software, then fab"]
+        MK["make -C sw"]
+        BR["bootrom.bin"]
+        FWB["firmware.bin"]
+        FAB["fab: SHA-256 of firmware.bin<br/>--measured-only sets enforce = 0"]
+        FL["flash image<br/>--tamper patches 17 bytes"]
+        MK --> BR
+        MK --> FWB
+        FWB --> FAB
+        FWB --> FL
+    end
+    subgraph S3["3 · Pass 2: generate and run"]
+        E2["elaborate the SoC again"]
+        subgraph LOGIC["logic"]
+            V["sim.v"] --> VL["Verilator<br/>skipped if sim.v is unchanged"]
+        end
+        subgraph DATA["data, loaded at power-on"]
+            I1["sim_rom.init<br/>boot ROM"]
+            I2["sim_main_ram.init<br/>flash"]
+            I3["sim_otp.init<br/>digest · length · enforce"]
+        end
+        VS["./Vsim<br/>UART → your terminal"]
+        E2 --> V
+        E2 --> I1 & I2 & I3
+        VL --> VS
+        I1 & I2 & I3 -.-> VS
+    end
+    HDR --> MK
+    BR & FL & FAB --> E2
+    classDef trusted fill:#d5e8d4,stroke:#82b366,color:#000
+    classDef mutable fill:#ffe6cc,stroke:#d79b00,color:#000
+    class BR,FAB,I1,I3 trusted
+    class FWB,FL,I2 mutable

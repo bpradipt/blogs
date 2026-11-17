@@ -1,0 +1,28 @@
+flowchart TB
+    CPU["CPU, through the interconnect <br/>loads and stores to 0xF000_0800 … 0xF000_086F"]
+    subgraph ROT["RoT block"]
+        direction TB
+        GATE{"locked?"}
+        OTP[("OTP fuses<br/>digest · length")]
+        ZERO["reads as 0"]
+        ENF[("OTP fuse<br/>enforce")]
+        LOCK["lock register"]
+        FF["locked flip-flop<br/>sticky until reset<br/>CPU reads it as locked"]
+        STAGE["meas_stage<br/>256-bit, CPU-writable"]
+        MEAS["measurement<br/>256-bit, read-only"]
+    end
+    CPU -- "read fuse_digest, fuse_len" --> GATE
+    GATE -- "no" --> OTP
+    GATE -- "yes" --> ZERO
+    CPU -- "read fuse_enforce<br/>(policy, always readable)" --> ENF
+    CPU -- "write 1" --> LOCK
+    LOCK -- "first 1 sets" --> FF
+    CPU -- "write digest" --> STAGE
+    CPU -- "read" --> MEAS
+    STAGE -- "copied once,<br/>on the lock edge" --> MEAS
+    FF -. "drives" .-> GATE
+    FF -. "triggers copy" .-> MEAS
+    classDef trusted fill:#d5e8d4,stroke:#82b366,color:#000
+    classDef guarded fill:#d0eef0,stroke:#3a9ea5,color:#000
+    class OTP,ENF trusted
+    class FF,MEAS guarded

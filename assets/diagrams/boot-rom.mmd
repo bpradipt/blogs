@@ -1,0 +1,16 @@
+flowchart TD
+    RST(["reset: CPU starts in the boot ROM at 0x0000_0000"])
+    M["1 · measure<br/>h = SHA-256 of main_ram, fuse_len bytes"]
+    REC["2 · record<br/>meas_stage ← h"]
+    V["3 · verify<br/>match = (h == fuse_digest)"]
+    L["4 · lock<br/>lock ← 1: fuses read as 0, measurement freezes"]
+    D{"5 · decide"}
+    RST --> M --> REC --> V --> L --> D
+    D -- "match, or enforce = 0" --> J["jump to firmware @ 0x4000_0000<br/>untrusted until proven otherwise"]
+    D -- "mismatch and enforce = 1" --> H(["halt"])
+    classDef trusted fill:#d5e8d4,stroke:#82b366,color:#000
+    classDef mutable fill:#ffe6cc,stroke:#d79b00,color:#000
+    classDef stop fill:#f8cecc,stroke:#b85450,color:#000
+    class M,REC,V,L,D trusted
+    class J mutable
+    class H stop

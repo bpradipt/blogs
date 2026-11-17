@@ -1,0 +1,13 @@
+sequenceDiagram
+    participant FW as firmware
+    participant LIB as uart_write()
+    participant BUS as interconnect
+    participant UART as UART @ 0xF000_3000
+    participant OUT as your terminal
+    FW->>LIB: printf("hello") sends 'h'
+    LIB->>BUS: load 0xF000_3004 (txfull?)
+    BUS->>UART: 0xF000_xxxx → CSR region → UART slot
+    UART-->>LIB: 0, the FIFO has room
+    LIB->>BUS: store 0x68 to 0xF000_3000
+    BUS->>UART: byte enters the TX FIFO
+    UART->>OUT: real chip: TX pin, simulator: serial2console

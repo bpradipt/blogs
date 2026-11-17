@@ -1,0 +1,10 @@
+flowchart LR
+    R(["reset"]) --> ROM["Boot ROM<br/>on-chip, immutable"]
+    ROM --> FW["First-stage firmware<br/>external flash, updatable"]
+    FW --> BL["Bootloader<br/>flash or disk"]
+    BL --> K["OS kernel<br/>disk"]
+    K --> U["Userspace"]
+    classDef trusted fill:#d5e8d4,stroke:#82b366,color:#000
+    classDef mutable fill:#ffe6cc,stroke:#d79b00,color:#000
+    class ROM trusted
+    class FW,BL,K,U mutable
