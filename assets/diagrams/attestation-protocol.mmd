@@ -1,0 +1,20 @@
+sequenceDiagram
+    participant FW as Firmware (in the chip)
+    participant H as Host (untrusted relay)
+    participant V as Verifier
+    FW->>H: HELLO
+    H->>V: HELLO
+    V->>H: NONCE (32 random bytes)
+    H->>FW: NONCE
+    Note over FW: report = nonce + key-release public key<br/>signed with the Alias key
+    FW->>H: EVIDENCE: DeviceID, Alias certificate, report, signature
+    H->>V: EVIDENCE
+    Note over V: four checks
+    alt all checks pass
+        V->>H: SECRET, encrypted to the key-release key
+        H->>FW: SECRET
+        Note over FW: decrypts the secret
+    else any check fails
+        V->>H: DENIED
+        H->>FW: DENIED
+    end

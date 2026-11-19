@@ -1,0 +1,8 @@
+flowchart LR
+    MFG["Manufacturer's list<br/>of genuine DeviceID keys"]
+    DEV["DeviceID public key"]
+    CERT["Alias certificate<br/>Alias public key + measurement"]
+    REP["Report<br/>verifier's nonce + key-release public key"]
+    MFG -- "lists" --> DEV
+    DEV -- "signs" --> CERT
+    CERT -- "its Alias key signs" --> REP

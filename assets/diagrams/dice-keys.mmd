@@ -1,0 +1,20 @@
+flowchart TB
+    UDS[("UDS<br/>fuses, hidden after lock")]
+    FW["firmware in RAM"]
+    M["measurement<br/>SHA-256 of the firmware"]
+    CDI["CDI<br/>HMAC(UDS, measurement)"]
+    DEV["DeviceID key pair<br/>same on every boot"]
+    ALIAS["Alias key pair<br/>changes with the firmware"]
+    CERT["Alias certificate<br/>Alias public key + measurement,<br/>signed by DeviceID"]
+    FW --> M
+    UDS --> CDI
+    M --> CDI
+    UDS -- "HKDF 'DeviceID'" --> DEV
+    CDI -- "HKDF 'Alias'" --> ALIAS
+    ALIAS --> CERT
+    M --> CERT
+    DEV -- "signs" --> CERT
+    classDef secret fill:#d5e8d4,stroke:#82b366,color:#000
+    classDef given fill:#ffe6cc,stroke:#d79b00,color:#000
+    class UDS,CDI,DEV secret
+    class ALIAS,CERT given
