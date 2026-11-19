@@ -1,0 +1,7 @@
+flowchart LR
+    T["kbs-types<br/>Tee::LitexDice"] --> K["KBS<br/>accepts tee = litexdice"]
+    T --> V["Verifier<br/>deps/verifier/src/litexdice"]
+    V --> P["AS default policy<br/>litexdice rules"]
+    R[("RVPS<br/>reference values")] --> P
+    P --> E["EAR token<br/>affirming / warning"]
+    E --> RP["KBS resource policy<br/>release or refuse"]

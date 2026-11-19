@@ -1,0 +1,17 @@
+sequenceDiagram
+    participant FW as Firmware (in the chip)
+    participant H as Host (untrusted relay)
+    participant KBS as Trustee KBS + AS + RVPS
+    FW->>H: HELLO
+    H->>KBS: POST /kbs/v0/auth (tee = litexdice)
+    KBS-->>H: Challenge: nonce
+    H->>FW: NONCE
+    Note over FW: P-256 TEE key<br/>REPORT_DATA = SHA-384(runtime data)<br/>signed with the Alias key
+    FW->>H: TEEPUBKEY, EVIDENCE
+    H->>KBS: POST /kbs/v0/attest
+    Note over KBS: litexdice verifier, then default_cpu policy<br/>result: EAR token
+    KBS-->>H: token (or 401)
+    H->>KBS: GET /kbs/v0/resource/default/key/tenant-42
+    KBS-->>H: JWE (or 401: resource policy)
+    H->>FW: JWE
+    Note over FW: ECDH, unwrap key, AES-GCM
