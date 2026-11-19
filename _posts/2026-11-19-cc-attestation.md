@@ -1,5 +1,6 @@
 ---
 title: "Proving What Runs: DICE, Attestation and Confidential Computing on a Simulated SoC"
+date: 2026-11-19 09:00:00 +0000
 tags: [soc, security, confidential-computing, attestation]
 ---
 

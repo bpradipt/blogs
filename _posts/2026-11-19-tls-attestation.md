@@ -1,5 +1,6 @@
 ---
 title: "Taking the Host Out of the Protocol: A Bare-Metal TEE Talks TLS to Trustee"
+date: 2026-11-19 13:00:00 +0000
 tags: [soc, security, confidential-computing, attestation]
 ---
 

@@ -1,5 +1,6 @@
 ---
 title: "Teaching Trustee a New TEE: The DICE Lab Chip Meets a Real Key Broker"
+date: 2026-11-19 11:00:00 +0000
 tags: [soc, security, confidential-computing, attestation]
 ---
 
