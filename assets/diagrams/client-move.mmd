@@ -1,0 +1,11 @@
+flowchart TB
+    subgraph old ["trustee-lab: the host runs the KBS client"]
+        direction LR
+        fw1["Firmware<br/>TEE key, evidence,<br/>JWE decryption"] <-->|"UART: NONCE, TEEPUBKEY,<br/>EVIDENCE, JWE"| h1["Host, kbs_host.py<br/>KBS client"]
+        h1 <-->|"plain HTTP"| k1["Trustee KBS"]
+    end
+    subgraph new ["tls-lab: the firmware runs the KBS client"]
+        direction LR
+        fw2["Firmware<br/>KBS client, TLS, TEE key,<br/>evidence, JWE decryption"] <-->|"UART: TLS records as hex"| h2["Host, kbs_host.py<br/>byte pipe"]
+        h2 <-->|"TCP: TLS records"| k2["Trustee KBS<br/>HTTPS"]
+    end
